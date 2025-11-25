@@ -6,13 +6,10 @@
 
     <title>Slope Launcher</title>
 
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
 
-    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -23,9 +20,7 @@
                         bgDark: "#0d0d11",
                         panel: "rgba(255, 255, 255, 0.05)"
                     },
-                    fontFamily: {
-                        sans: ["Inter", "sans-serif"]
-                    },
+                    fontFamily: { sans: ["Inter", "sans-serif"] },
                     boxShadow: {
                         glow: "0 0 25px rgba(16,185,129,0.7)",
                         panel: "0 0 35px rgba(0,0,0,0.5)",
@@ -43,33 +38,26 @@
             background: #0d0d11;
         }
 
-        /* REAL FIX: Scale the launcher wrapper, not the whole page */
+        /* FIX: Use flexbox to stretch UI to full height */
         #launcher-wrapper {
-            width: 1600px;
-            height: 900px;
-            transform-origin: top left;
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
         }
 
-        @media (max-width: 1600px), (max-height: 900px) {
-            #launcher-wrapper {
-                transform: scale(
-                    min(calc(100vw / 1600), calc(100vh / 900))
-                );
-            }
-        }
-
+        /* FIX: Fullscreen container */
         #fullscreen-game-container {
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100vw;
             height: 100vh;
             background: black;
             z-index: 100;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease-in-out;
+            transition: opacity 0.35s ease-in-out;
         }
         #fullscreen-game-container.active {
             opacity: 1;
@@ -80,84 +68,75 @@
 
 <body class="text-white font-sans">
 
-<!-- MAIN FIXED SCALING WRAPPER -->
 <div id="launcher-wrapper">
 
-<!-- HEADER -->
-<header class="w-full py-5 px-8 flex items-center justify-between bg-panel backdrop-blur-md shadow-panel border-b border-white/10">
-    <h1 class="text-3xl font-extrabold tracking-wide text-primary drop-shadow">
-        SLOPE LAUNCHER
-    </h1>
-
-    <nav class="flex items-center space-x-6">
+    <!-- HEADER -->
+    <header class="w-full flex-none py-5 px-8 flex items-center justify-between 
+        bg-panel backdrop-blur-md shadow-panel border-b border-white/10">
+        <h1 class="text-3xl font-extrabold tracking-wide text-primary drop-shadow">
+            SLOPE LAUNCHER
+        </h1>
         <span class="text-gray-400 text-sm">Version 1.0</span>
-    </nav>
-</header>
+    </header>
 
-<!-- MAIN LAYOUT -->
-<div class="w-full h-[calc(900px-90px)] flex">
+    <!-- MAIN AREA -->
+    <div class="flex flex-1 min-h-0">
 
-    <!-- SIDEBAR — NON-SCROLL -->
-    <aside class="w-1/4 h-full p-5 space-y-4 bg-panel backdrop-blur-md border-r border-white/10 overflow-hidden">
-        <h2 class="text-xl font-bold mb-4 text-primary">Versions</h2>
-        <div id="version-list-container" class="space-y-3"></div>
-    </aside>
+        <!-- SIDEBAR (NON-SCROLLING) -->
+        <aside class="w-1/4 flex-none p-5 space-y-4 bg-panel backdrop-blur-md border-r border-white/10">
+            <h2 class="text-xl font-bold text-primary">Versions</h2>
+            <div id="version-list-container" class="space-y-3"></div>
+        </aside>
 
-    <!-- MAIN PANEL — NON SCROLL -->
-    <main class="flex-1 p-10 space-y-8 overflow-hidden">
+        <!-- MAIN PANEL (FILLS HEIGHT, NO SCROLL) -->
+        <main class="flex flex-col flex-1 min-h-0 p-8 space-y-6">
 
-        <!-- Game Title -->
-        <div>
-            <h1 id="main-title" class="text-6xl font-extrabold tracking-tight"></h1>
-            <p id="main-description" class="text-gray-400 text-lg mt-2"></p>
-        </div>
-
-        <!-- Thumbnail -->
-        <div class="rounded-2xl overflow-hidden shadow-panel border border-primary/20 bg-[#0f0f16] relative h-[350px]">
-            <img id="game-thumbnail" class="w-full h-full object-cover opacity-60" />
-            <div class="absolute inset-0 flex items-center justify-center">
-                <span class="bg-black/40 px-4 py-2 rounded-lg text-xl font-bold tracking-wide">
-                    PREVIEW
-                </span>
-            </div>
-        </div>
-
-        <!-- Details Panel -->
-        <div class="bg-panel backdrop-blur-md border border-white/10 rounded-xl p-5">
-            <h3 class="text-primary font-bold text-xl mb-2">Version Details</h3>
-            <p id="main-info" class="text-gray-300"></p>
-        </div>
-
-        <!-- Bottom Bar -->
-        <div class="flex items-center justify-between mt-10 pt-6 border-t border-white/10">
+            <!-- Title -->
             <div>
-                <p>Selected: <span id="current-selection-name" class="font-bold text-primary"></span></p>
-                <p id="current-url-display" class="text-gray-400 text-sm"></p>
+                <h1 id="main-title" class="text-5xl font-extrabold tracking-tight"></h1>
+                <p id="main-description" class="text-gray-400 text-lg mt-1"></p>
             </div>
 
-            <button id="launch-button"
-                onclick="launchGameInternal()"
-                class="px-12 py-4 rounded-2xl bg-primary shadow-glow hover:scale-105 transition-all font-bold text-xl">
-                LAUNCH
-            </button>
-        </div>
+            <!-- Thumbnail (flex-shrink allowed) -->
+            <div class="rounded-2xl overflow-hidden shadow-panel border border-primary/20 
+                bg-[#0f0f16] relative flex-none h-[clamp(200px,30vh,350px)]">
+                <img id="game-thumbnail" class="w-full h-full object-cover opacity-60" />
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="bg-black/40 px-4 py-2 rounded-lg text-xl font-bold">PREVIEW</span>
+                </div>
+            </div>
 
-    </main>
+            <!-- Details (flex-grow so it fits automatically) -->
+            <div class="bg-panel backdrop-blur-md border border-white/10 rounded-xl p-5 flex-none">
+                <h3 class="text-primary font-bold text-xl mb-1">Version Details</h3>
+                <p id="main-info" class="text-gray-300"></p>
+            </div>
 
+            <!-- Bottom Bar (ALWAYS visible) -->
+            <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+                <div>
+                    <p>Selected: <span id="current-selection-name" class="font-bold text-primary"></span></p>
+                    <p id="current-url-display" class="text-gray-400 text-sm"></p>
+                </div>
+
+                <button id="launch-button"
+                    onclick="launchGameInternal()"
+                    class="px-10 py-4 rounded-2xl bg-primary shadow-glow hover:scale-105 transition-all font-bold text-xl">
+                    LAUNCH
+                </button>
+            </div>
+
+        </main>
+
+    </div>
 </div>
-</div> <!-- END WRAPPER -->
 
-<!-- FULLSCREEN GAME -->
+<!-- FULLSCREEN -->
 <div id="fullscreen-game-container">
-    <button onclick="stopGame()"
-            class="absolute top-4 right-4 bg-red-500 px-4 py-2 rounded-lg font-bold border border-white shadow-lg">
+    <button onclick="stopGame()" class="absolute top-4 right-4 bg-red-500 px-4 py-2 rounded-lg font-bold border border-white shadow-lg">
         STOP
     </button>
-
-    <iframe id="fullscreen-game-iframe"
-            class="w-full h-full"
-            src="about:blank"
-            frameborder="0"></iframe>
+    <iframe id="fullscreen-game-iframe" class="w-full h-full" src="about:blank" frameborder="0"></iframe>
 </div>
 
 <script>
@@ -170,63 +149,52 @@ const slopeVersions = [
 
 let selectedVersionId = slopeVersions[0].id;
 
-const mainTitle = document.getElementById("main-title");
-const mainDescription = document.getElementById("main-description");
-const mainInfo = document.getElementById("main-info");
-const gameThumbnail = document.getElementById("game-thumbnail");
-const currentSelectionName = document.getElementById("current-selection-name");
-const currentUrlDisplay = document.getElementById("current-url-display");
-const versionListContainer = document.getElementById("version-list-container");
-
-const fullscreenContainer = document.getElementById("fullscreen-game-container");
-const fullscreenIframe = document.getElementById("fullscreen-game-iframe");
-
 function selectVersion(id) {
     const version = slopeVersions.find(v => v.id === id);
 
-    document.querySelectorAll(".version-card").forEach(card => {
-        card.classList.remove("border-primary", "shadow-glow");
-    });
+    document.querySelectorAll(".version-card").forEach(c =>
+        c.classList.remove("border-primary", "shadow-glow")
+    );
 
     document.getElementById("card-" + id).classList.add("border-primary", "shadow-glow");
 
-    mainTitle.textContent = version.name;
-    mainDescription.textContent = version.desc;
-    mainInfo.textContent = version.info;
-    gameThumbnail.src = version.thumb;
-    currentSelectionName.textContent = version.name;
-    currentUrlDisplay.textContent = "URL: " + version.url;
+    document.getElementById("main-title").textContent = version.name;
+    document.getElementById("main-description").textContent = version.desc;
+    document.getElementById("main-info").textContent = version.info;
+    document.getElementById("game-thumbnail").src = version.thumb;
+    document.getElementById("current-selection-name").textContent = version.name;
+    document.getElementById("current-url-display").textContent = "URL: " + version.url;
 
     selectedVersionId = id;
 }
 
 function renderVersionList() {
+    const container = document.getElementById("version-list-container");
     slopeVersions.forEach(v => {
         const div = document.createElement("div");
         div.id = "card-" + v.id;
         div.className = `
-            version-card p-4 rounded-xl 
-            bg-panel backdrop-blur-md border border-white/10 
-            cursor-pointer hover:border-primary/40 hover:bg-white/10 transition-all
+            version-card p-4 rounded-xl bg-panel backdrop-blur-md 
+            border border-white/10 cursor-pointer hover:border-primary/40 hover:bg-white/10 transition-all
         `;
         div.innerHTML = `
             <h3 class="text-lg font-bold">${v.name}</h3>
             <p class="text-gray-400 text-sm">${v.desc}</p>
         `;
         div.onclick = () => selectVersion(v.id);
-        versionListContainer.appendChild(div);
+        container.appendChild(div);
     });
 }
 
 function launchGameInternal() {
-    const v = slopeVersions.find(v => v.id === selectedVersionId);
-    fullscreenIframe.src = v.url;
-    fullscreenContainer.classList.add("active");
+    const v = slopeVersions.find(x => x.id === selectedVersionId);
+    document.getElementById("fullscreen-game-iframe").src = v.url;
+    document.getElementById("fullscreen-game-container").classList.add("active");
 }
 
 function stopGame() {
-    fullscreenIframe.src = "about:blank";
-    fullscreenContainer.classList.remove("active");
+    document.getElementById("fullscreen-game-iframe").src = "about:blank";
+    document.getElementById("fullscreen-game-container").classList.remove("active");
 }
 
 window.onload = () => {
