@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slope Multiverse Launcher</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind for a cool, dark theme, using green accents -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-main': '#10B981', /* Bright Green (Main Accent) */
+                        'secondary-sub': '#065F46', /* Deep Forest Green (Button/Contrast) */
+                        'dark-bg': '#14141A', /* Deep background */
+                        'app-bg': '#1E1E28', /* App body background */
+                        'card-bg': '#2C2C38', /* Card/Panel background */
+                        'primary-hover': '#34D399', // Lighter, vibrant green for hover
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'neon': '0 0 15px rgba(16, 185, 129, 0.7)', /* Soft green glow */
+                        'button-glow': '0 0 15px rgba(16, 185, 129, 0.5)', /* Green launch button glow */
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: theme('colors.dark-bg');
+            /* Soft green radial gradient background */
+            background-image: radial-gradient(circle at 50% 10%, rgba(16, 185, 129, 0.1), transparent 70%);
+            /* Full screen layout */
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex; /* Keep flex for layout consistency */
+        }
+        /* Custom scrollbar style for the version list */
+        .version-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .version-list-container::-webkit-scrollbar-thumb {
+            background-color: theme('colors.card-bg');
+            border-radius: 3px;
+        }
+        .version-list-container::-webkit-scrollbar-track {
+            background-color: theme('colors.app-bg');
+        }
+        /* Ensure transitions are smooth */
+        .transition-colors { transition-property: background-color, border-color, color; }
+        .transition-transform { transition-property: transform; }
+        
+        /* Full-screen overlay styles */
+        #fullscreen-game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none; /* Invisible and non-interactive by default */
+            transition: opacity 0.5s ease-in-out;
+            background-color: black;
+        }
+        #fullscreen-game-container.active {
+            opacity: 1;
+            pointer-events: auto; /* Active and interactive */
+        }
+        #fullscreen-game-iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Stop button on top of the fullscreen game */
+        #fullscreen-stop-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 101; /* Above the iframe */
+            padding: 0.5rem 1rem; /* Reduced padding for smaller size */
+            font-size: 0.875rem; /* Added font size: text-sm equivalent */
+            background-color: rgba(220, 38, 38, 0.8); /* Red/Stop Color */
+            color: white;
+            border: 2px solid white;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        #fullscreen-stop-button:hover {
+            background-color: rgb(220, 38, 38);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<!-- Removed p-8 flex items-center justify-center from body -->
+<body class="min-h-screen text-gray-100 flex">
+
+    <!-- MAIN LAUNCHER WINDOW (Now covers the entire viewport) -->
+    <div id="launcher-main-ui" class="w-full h-screen bg-app-bg overflow-hidden flex flex-col md:flex-row shadow-2xl transition-opacity duration-500">
+
+        <!-- VERSION SELECTION PANEL (Left Sidebar) -->
+        <div class="w-full md:w-1/4 bg-card-bg flex flex-col p-4 border-r border-gray-700/50">
+            <!-- Updated title here -->
+            <h2 class="text-2xl font-extrabold text-primary-main mb-4 pb-2 border-b border-primary-main/50 uppercase tracking-widest">SLOPE LAUNCHER</h2>
+            
+            <div id="version-list-container" class="flex-grow space-y-3 overflow-y-auto version-list-container">
+                <!-- Version Cards will be injected here by JavaScript -->
+            </div>
+            
+            <p class="mt-4 text-xs text-gray-500 text-center">Slope Multiverse v1.0</p>
+        </div>
+
+        <!-- MAIN LAUNCH PANEL (Right Content) -->
+        <div class="flex-grow flex flex-col p-6 space-y-6">
+
+            <!-- Title and Description Area -->
+            <div class="flex-grow space-y-4">
+                <h1 id="main-title" class="text-5xl font-extrabold text-white tracking-tight">Slope Plus</h1>
+                <p id="main-description" class="text-gray-300 text-lg border-l-4 border-primary-main pl-4">An enhanced version with extra features, skins, or modes.</p>
+                
+                <!-- THUMBNAIL CONTAINER -->
+                <div id="game-container" class="w-full h-64 bg-gray-900 rounded-lg shadow-inner flex items-center justify-center border-2 border-primary-main/50 overflow-hidden relative transition-all duration-300">
+                    <img id="game-thumbnail" src="" alt="Game Thumbnail" class="w-full h-full object-cover">
+                    <!-- Text Overlay -->
+                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                         <div class="text-2xl text-white font-bold tracking-widest p-2 rounded-lg bg-black/50">PREVIEW</div>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-card-bg p-4 rounded-lg border border-gray-700">
+                    <h3 class="font-semibold text-primary-main mb-1">Version Details:</h3>
+                    <p id="main-info" class="text-sm text-gray-400">Edit this URL to link your preferred version.</p>
+                </div>
+            </div>
+
+            <!-- Launch Button and Footer Info -->
+            <div class="flex items-end justify-between pt-4 border-t border-gray-700/50">
+                <div class="text-xs text-gray-500 space-y-1">
+                    <p>Current Selection: <span id="current-selection-name" class="font-bold text-white">Slope Plus</span></p>
+                    <p id="current-url-display">URL: https://example.com/slope-plus</p>
+                </div>
+                
+                <!-- Launch Button only triggers launchGameInternal -->
+                <button id="launch-button"
+                        class="w-48 py-4 bg-secondary-sub rounded-xl font-bold text-white text-xl shadow-lg shadow-button-glow transition-all duration-300 hover:bg-primary-hover hover:shadow-neon transform hover:scale-105"
+                        onclick="launchGameInternal()">
+                    LAUNCH
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FULL-SCREEN GAME OVERLAY -->
+    <div id="fullscreen-game-container">
+        <!-- The button to stop the game is placed here, outside the iframe -->
+        <button id="fullscreen-stop-button" onclick="stopGame()">STOP GAME</button>
+        <iframe id="fullscreen-game-iframe" src="about:blank" frameborder="0" allowfullscreen></iframe>
+    </div>
+
+    <script>
+        // --- GAME DATA ---
+        const slopeVersions = [
+            // Added 'thumb' property for the small image placeholder
+            { id: 'vP', name: 'Slope Plus', desc: 'An enhanced version with extra features for dedicated players', url: 'https://bbcd.me/build', info: 'Edit this URL to link your preferred version.', thumb: 'https://1games.io/data/image/game/slope/slope.jpg' },
+            { id: 'v1', name: 'Slope', desc: 'The core, classic endless runner experience.', url: 'https://slopenexus.github.io/games/27Sept/index.html', info: 'Commonly available version. Use Arrow Keys / A/D to steer.', thumb: 'https://slopefree.org/assets/slope/slope.webp' },
+            { id: 'v2', name: 'Slope 2', desc: 'An unofficial sequel to Slope.', url: 'https://ucbg.github.io/slope-2-players/', info: 'Smoother gameplay on certain devices. Check controls for touch devices.', thumb: 'https://images.sftcdn.net/images/t_app-cover-s,f_auto/p/ff1b5222-8eb8-41dd-aa6e-6dee5cd6e7a6/2839353243/slope-2-screenshot' },
+            { id: 'v3', name: 'Slope 3', desc: 'Unofficial third slope game.', url: 'https://ubg44.github.io/Slope3/', info: 'Edit this URL to link your preferred version.', thumb: 'https://slopefree.org/assets/slope/slope-3.webp' },
+            { id: 'v4', name: 'Slope (Old)', desc: 'The core, classic endless runner experience.', url: 'https://slopenexus.github.io/games/v9/index.html', info: 'Commonly available version. Use Arrow Keys / A/D to steer.', thumb: 'https://play-lh.googleusercontent.com/FFrKIqKVpB9HMpaaF0HUc5Sza5W2sM8GFZGfkddU39xPcKCa4BYXQghoWVGlQGpaAA=w526-h296-rw' },
+        ];
+
+        let selectedVersionId = slopeVersions[0].id; // Default to the first version
+
+        // --- DOM ELEMENTS (Launcher UI) ---
+        const launcherMainUI = document.getElementById('launcher-main-ui');
+        const versionListContainer = document.getElementById('version-list-container');
+        const mainTitle = document.getElementById('main-title');
+        const mainDescription = document.getElementById('main-description');
+        const mainInfo = document.getElementById('main-info');
+        const currentSelectionName = document.getElementById('current-selection-name');
+        const currentUrlDisplay = document.getElementById('current-url-display');
+        const gameThumbnail = document.getElementById('game-thumbnail');
+        const launchButton = document.getElementById('launch-button');
+        
+        // --- DOM ELEMENTS (Full Screen UI) ---
+        const fullscreenGameContainer = document.getElementById('fullscreen-game-container');
+        const fullscreenGameIframe = document.getElementById('fullscreen-game-iframe');
+        const fullscreenStopButton = document.getElementById('fullscreen-stop-button');
+
+
+        // --- FUNCTIONS ---
+
+        /**
+         * Selects a version and updates the main launch panel.
+         * @param {string} id The ID of the version to select.
+         */
+        function selectVersion(id) {
+            const version = slopeVersions.find(v => v.id === id);
+            if (!version) return;
+            
+            // 1. Update active state in the list
+            document.querySelectorAll('.version-card').forEach(card => {
+                card.classList.remove('border-primary-main', 'bg-primary-main/20', 'shadow-neon');
+                card.classList.add('border-transparent');
+            });
+            const activeCard = document.getElementById(`card-${id}`);
+            activeCard.classList.add('border-primary-main', 'bg-primary-main/20', 'shadow-neon');
+            activeCard.classList.remove('border-transparent');
+
+            // 2. Update main launch panel content
+            mainTitle.textContent = version.name;
+            mainDescription.textContent = version.desc;
+            mainInfo.textContent = version.info;
+            currentSelectionName.textContent = version.name;
+            currentUrlDisplay.textContent = `URL: ${version.url}`;
+            gameThumbnail.src = version.thumb; // Update the thumbnail image
+            selectedVersionId = id;
+
+            // 3. Optional: Add animation for content update
+            mainTitle.style.opacity = 0;
+            setTimeout(() => {
+                mainTitle.style.opacity = 1;
+            }, 50);
+        }
+        
+        /**
+         * Dynamically creates the version cards for the sidebar.
+         */
+        function renderVersionList() {
+            slopeVersions.forEach(version => {
+                const card = document.createElement('div');
+                card.id = `card-${version.id}`;
+                card.className = 'version-card p-3 bg-card-bg rounded-lg border-2 border-transparent cursor-pointer transition-all duration-200 hover:border-primary-main/50 hover:bg-primary-main/10';
+                card.innerHTML = `
+                    <h3 class="text-lg font-bold text-white">${version.name}</h3>
+                    <p class="text-xs text-gray-400 truncate">${version.desc}</p>
+                `;
+                card.onclick = () => selectVersion(version.id);
+                versionListContainer.appendChild(card);
+            });
+        }
+        
+        /**
+         * Launches the currently selected game version in a full-screen iframe overlay.
+         */
+        function launchGameInternal() {
+            const version = slopeVersions.find(v => v.id === selectedVersionId);
+            if (!version) return;
+
+            if (version.url.includes('example.com')) {
+                showMessage("Placeholder URL detected. Please edit the source code to replace the placeholder link!", 'error');
+                return;
+            }
+            
+            // 1. Prepare and show the full-screen iframe
+            fullscreenGameIframe.src = version.url;
+            fullscreenGameContainer.classList.add('active');
+            
+            // 2. Hide the main launcher UI
+            launcherMainUI.style.opacity = 0;
+            launcherMainUI.style.pointerEvents = 'none';
+
+            showMessage(`Launching ${version.name} in full screen...`, 'success');
+        }
+
+        /**
+         * Stops the current game and reverts to the launcher view.
+         */
+        function stopGame() {
+            // 1. Clear iframe and hide it
+            fullscreenGameIframe.src = 'about:blank';
+            fullscreenGameContainer.classList.remove('active');
+            
+            // 2. Show the main launcher UI
+            launcherMainUI.style.opacity = 1;
+            launcherMainUI.style.pointerEvents = 'auto';
+            
+            showMessage("Game stopped. Ready to launch another version.", 'success');
+        }
+
+
+        /**
+         * Displays a simple, temporary message box on the screen.
+         * @param {string} message The message to display.
+         * @param {string} type 'success' or 'error' for coloring.
+         */
+        function showMessage(message, type = 'success') {
+            let container = document.getElementById('message-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'message-container';
+                container.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 z-50';
+                document.body.appendChild(container);
+            }
+
+            const alertDiv = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-600' : 'bg-primary-main';
+            alertDiv.className = `${bgColor} text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-300 ease-out flex items-center space-x-2 shadow-neon`;
+            alertDiv.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(alertDiv);
+
+            // Animate out after 4 seconds
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translateY(-20px)';
+                alertDiv.addEventListener('transitionend', () => alertDiv.remove());
+            }, 4000);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+             renderVersionList();
+             selectVersion(slopeVersions[0].id); 
+        };
+    </script>
+</body>
+</html>
