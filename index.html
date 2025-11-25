@@ -23,15 +23,12 @@
                         bgDark: "#0d0d11",
                         panel: "rgba(255, 255, 255, 0.05)"
                     },
-                    backdropBlur: {
-                        xs: "2px",
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"]
                     },
                     boxShadow: {
                         glow: "0 0 25px rgba(16,185,129,0.7)",
                         panel: "0 0 35px rgba(0,0,0,0.5)",
-                    },
-                    fontFamily: {
-                        sans: ["Inter", "sans-serif"]
                     }
                 }
             }
@@ -39,7 +36,6 @@
     </script>
 
     <style>
-        /* Entire launcher scaling */
         html, body {
             width: 100%;
             height: 100%;
@@ -47,13 +43,16 @@
             background: #0d0d11;
         }
 
-        body {
+        /* REAL FIX: Scale the launcher wrapper, not the whole page */
+        #launcher-wrapper {
+            width: 1600px;
+            height: 900px;
             transform-origin: top left;
+            overflow: hidden;
         }
 
-        /* Auto-scale to fit screen */
         @media (max-width: 1600px), (max-height: 900px) {
-            body {
+            #launcher-wrapper {
                 transform: scale(
                     min(calc(100vw / 1600), calc(100vh / 900))
                 );
@@ -79,10 +78,10 @@
     </style>
 </head>
 
-<body class="bg-bgDark text-white font-sans">
+<body class="text-white font-sans">
 
-<!-- MAIN FIXED LAYOUT WRAPPER -->
-<div style="width:1600px; height:900px; overflow:hidden;">
+<!-- MAIN FIXED SCALING WRAPPER -->
+<div id="launcher-wrapper">
 
 <!-- HEADER -->
 <header class="w-full py-5 px-8 flex items-center justify-between bg-panel backdrop-blur-md shadow-panel border-b border-white/10">
@@ -98,16 +97,13 @@
 <!-- MAIN LAYOUT -->
 <div class="w-full h-[calc(900px-90px)] flex">
 
-    <!-- LEFT: FIXED SIDEBAR (no scroll) -->
+    <!-- SIDEBAR — NON-SCROLL -->
     <aside class="w-1/4 h-full p-5 space-y-4 bg-panel backdrop-blur-md border-r border-white/10 overflow-hidden">
-
         <h2 class="text-xl font-bold mb-4 text-primary">Versions</h2>
-
-        <div id="version-list-container" class="space-y-3 overflow-hidden"></div>
-
+        <div id="version-list-container" class="space-y-3"></div>
     </aside>
 
-    <!-- RIGHT PANEL -->
+    <!-- MAIN PANEL — NON SCROLL -->
     <main class="flex-1 p-10 space-y-8 overflow-hidden">
 
         <!-- Game Title -->
@@ -116,7 +112,7 @@
             <p id="main-description" class="text-gray-400 text-lg mt-2"></p>
         </div>
 
-        <!-- Thumbnail Preview -->
+        <!-- Thumbnail -->
         <div class="rounded-2xl overflow-hidden shadow-panel border border-primary/20 bg-[#0f0f16] relative h-[350px]">
             <img id="game-thumbnail" class="w-full h-full object-cover opacity-60" />
             <div class="absolute inset-0 flex items-center justify-center">
@@ -126,7 +122,7 @@
             </div>
         </div>
 
-        <!-- Info Panel -->
+        <!-- Details Panel -->
         <div class="bg-panel backdrop-blur-md border border-white/10 rounded-xl p-5">
             <h3 class="text-primary font-bold text-xl mb-2">Version Details</h3>
             <p id="main-info" class="text-gray-300"></p>
@@ -149,7 +145,7 @@
     </main>
 
 </div>
-</div> <!-- END FIXED WRAPPER -->
+</div> <!-- END WRAPPER -->
 
 <!-- FULLSCREEN GAME -->
 <div id="fullscreen-game-container">
@@ -165,7 +161,6 @@
 </div>
 
 <script>
-/* DATA */
 const slopeVersions = [
     { id:'vP', name:'Slope Plus', desc:'Enhanced features', url:'https://bbcd.me/', info:'Highly optimized.', thumb:'https://1games.io/data/image/game/slope/slope.jpg' },
     { id:'v1', name:'Slope', desc:'Classic version', url:'https://slopenexus.github.io/games/27Sept/index.html', info:'Original gameplay.', thumb:'https://slopefree.org/assets/slope/slope.webp' },
