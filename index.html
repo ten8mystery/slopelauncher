@@ -6,7 +6,7 @@
 
     <title>Slope Launcher</title>
 
-    <!-- ✅ FAVICON -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png">
 
     <!-- Tailwind -->
@@ -39,6 +39,27 @@
     </script>
 
     <style>
+        /* Entire launcher scaling */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #0d0d11;
+        }
+
+        body {
+            transform-origin: top left;
+        }
+
+        /* Auto-scale to fit screen */
+        @media (max-width: 1600px), (max-height: 900px) {
+            body {
+                transform: scale(
+                    min(calc(100vw / 1600), calc(100vh / 900))
+                );
+            }
+        }
+
         #fullscreen-game-container {
             position: fixed;
             top: 0;
@@ -58,9 +79,12 @@
     </style>
 </head>
 
-<body class="bg-bgDark text-white font-sans overflow-auto">
+<body class="bg-bgDark text-white font-sans">
 
-<!-- ⭐ HEADER -->
+<!-- MAIN FIXED LAYOUT WRAPPER -->
+<div style="width:1600px; height:900px; overflow:hidden;">
+
+<!-- HEADER -->
 <header class="w-full py-5 px-8 flex items-center justify-between bg-panel backdrop-blur-md shadow-panel border-b border-white/10">
     <h1 class="text-3xl font-extrabold tracking-wide text-primary drop-shadow">
         SLOPE LAUNCHER
@@ -71,20 +95,20 @@
     </nav>
 </header>
 
-<!-- ⭐ MAIN LAYOUT -->
-<div class="w-full h-[calc(100vh-90px)] flex">
+<!-- MAIN LAYOUT -->
+<div class="w-full h-[calc(900px-90px)] flex">
 
-    <!-- LEFT: GAME LIST -->
-    <aside class="w-1/4 h-full p-5 space-y-4 overflow-y-auto bg-panel backdrop-blur-md border-r border-white/10">
+    <!-- LEFT: FIXED SIDEBAR (no scroll) -->
+    <aside class="w-1/4 h-full p-5 space-y-4 bg-panel backdrop-blur-md border-r border-white/10 overflow-hidden">
 
         <h2 class="text-xl font-bold mb-4 text-primary">Versions</h2>
 
-        <div id="version-list-container" class="space-y-3"></div>
+        <div id="version-list-container" class="space-y-3 overflow-hidden"></div>
 
     </aside>
 
-    <!-- RIGHT: FEATURED PANEL -->
-    <main class="flex-1 p-10 space-y-8">
+    <!-- RIGHT PANEL -->
+    <main class="flex-1 p-10 space-y-8 overflow-hidden">
 
         <!-- Game Title -->
         <div>
@@ -125,8 +149,9 @@
     </main>
 
 </div>
+</div> <!-- END FIXED WRAPPER -->
 
-<!-- ⭐ FULLSCREEN -->
+<!-- FULLSCREEN GAME -->
 <div id="fullscreen-game-container">
     <button onclick="stopGame()"
             class="absolute top-4 right-4 bg-red-500 px-4 py-2 rounded-lg font-bold border border-white shadow-lg">
@@ -140,7 +165,7 @@
 </div>
 
 <script>
-/* ------------------------ DATA ------------------------ */
+/* DATA */
 const slopeVersions = [
     { id:'vP', name:'Slope Plus', desc:'Enhanced features', url:'https://bbcd.me/', info:'Highly optimized.', thumb:'https://1games.io/data/image/game/slope/slope.jpg' },
     { id:'v1', name:'Slope', desc:'Classic version', url:'https://slopenexus.github.io/games/27Sept/index.html', info:'Original gameplay.', thumb:'https://slopefree.org/assets/slope/slope.webp' },
@@ -148,7 +173,6 @@ const slopeVersions = [
     { id:'v3', name:'Slope 3', desc:'Third entry', url:'https://ubg44.github.io/Slope3/', info:'Latest unofficial build.', thumb:'https://slopefree.org/assets/slope/slope-3.webp' },
 ];
 
-/* ------------------------ ELEMENTS ------------------------ */
 let selectedVersionId = slopeVersions[0].id;
 
 const mainTitle = document.getElementById("main-title");
@@ -161,8 +185,6 @@ const versionListContainer = document.getElementById("version-list-container");
 
 const fullscreenContainer = document.getElementById("fullscreen-game-container");
 const fullscreenIframe = document.getElementById("fullscreen-game-iframe");
-
-/* ------------------------ FUNCTIONS ------------------------ */
 
 function selectVersion(id) {
     const version = slopeVersions.find(v => v.id === id);
@@ -212,7 +234,6 @@ function stopGame() {
     fullscreenContainer.classList.remove("active");
 }
 
-/* ------------------------ INIT ------------------------ */
 window.onload = () => {
     renderVersionList();
     selectVersion(slopeVersions[0].id);
